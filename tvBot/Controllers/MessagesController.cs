@@ -74,7 +74,7 @@ namespace tvBot
                         // List<Movie> movies = new List<Movie>();
                         var responseJSON = JsonConvert.DeserializeObject<List<Movie>>(responseString);
                         var responseMostPlayedJSON = JsonConvert.DeserializeObject<List<mostPlayed>>(responseMostPlayedString);
-                        if (message.Text.ToLower().Contains("popular") && message.Text.ToLower().Contains("most played"))
+                        if ((message.Text.ToLower().Contains("popular")|| message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")))
                         {
                             for (int i = 0; i < responseJSON.Count; i++)
                             {
@@ -85,7 +85,7 @@ namespace tvBot
                                     {
                                         moviess += $"{Environment.NewLine}{Environment.NewLine}------Popular Movies-------";
                                     }
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine} " + count + ")" + responseJSON[i].title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
                                 }
                             }
                             //Most played
@@ -98,44 +98,44 @@ namespace tvBot
                                     {
                                         moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Played Movies-------";
                                     }
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine}  " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
                                 }
                             }
                         }
-                        else if (message.Text.ToLower().Contains("popular"))
+                        else if (message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1"))
                         {
                             for (int i = 0; i < responseJSON.Count; i++)
                             {
-                                if (responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()) && message.Text.ToLower().Contains("popular"))
+                                if (responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()) && (message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")))
                                 {
                                     count++;
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine}" + count + ")" + responseJSON[i].title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine}>" + count + ")" + responseJSON[i].title.ToString();
                                 }
-                                else if (message.Text.ToLower().Contains("popular"))
+                                else if (message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1"))
                                 {
                                     count++;
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine} " + count + ")" + responseJSON[i].title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
                                 }
                             }
                         }
-                        else if (message.Text.ToLower().Contains("most play"))
+                        else if (message.Text.ToLower().Contains("most play") || message.Text.ToLower().Contains("2"))
                         {
                             for (int i = 0; i < responseMostPlayedJSON.Count; i++)
                             {
-                                if (responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()) && message.Text.ToLower().Contains("most played"))
+                                if (responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")))
                                 {
                                     count++;
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine}" + count + ")" + responseMostPlayedJSON[i].movie.title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine}" + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
                                 }
-                                else if (message.Text.ToLower().Contains("most played"))
+                                else if (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2"))
                                 {
                                     count++;
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine} " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
                                 }
                             }
 
                         }
-                        if (!(message.Text.ToLower().Contains("popular") && message.Text.ToLower().Contains("most played")))
+                        if (!((message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2"))))
                         {
                             for (int i = 0; i < responseJSON.Count; i++)
                             {
@@ -146,7 +146,7 @@ namespace tvBot
                                     {
                                         moviess += $"{Environment.NewLine}{Environment.NewLine}------Popular Movies-------";
                                     }
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine} " + count + ")" + responseJSON[i].title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
                                 }
                             }
                             //Most played
@@ -156,41 +156,53 @@ namespace tvBot
                                 if (responseMostPlayedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
                                 {
                                     count++;
-                                    if( countForMostPlayed == 0)
+                                    if (countForMostPlayed == 0)
                                     {
                                         moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Played Movies-------";
                                     }
                                     countForMostPlayed++;
-                                   moviess += $"{Environment.NewLine}{Environment.NewLine}  " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString();
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine}  " + count + ")>" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
                                 }
                             }
                         }
                         if (count < 1)
+                        {
+
+                            for (int j = 0; j < responseJSON.Count; j++)
                             {
-
-                                for (int j = 0; j < responseJSON.Count; j++)
+                                if (j == 0)
                                 {
-                                    noMoviess += $"{Environment.NewLine}{Environment.NewLine} " + (j+1) + ")" + responseJSON[j].title.ToString();
+                                    noMoviess += $"{Environment.NewLine}{Environment.NewLine} ------Popular Movie-----";
                                 }
-
+                                noMoviess += $"{Environment.NewLine}{Environment.NewLine} >" + (j + 1) + ")" + responseJSON[j].title.ToString();
                             }
+                            for (int j = 0; j < responseMostPlayedJSON.Count; j++)
+                            {
+                                if (j == 0)
+                                {
+                                    noMoviess += $"{Environment.NewLine}{Environment.NewLine} ------Most Played Movie-----";
+                                }
+                                noMoviess += $"{Environment.NewLine}{Environment.NewLine} >" + (j + 1) + ")" + responseMostPlayedJSON[j].movie.title.ToString()+" - Views("+ responseMostPlayedJSON[j].watcher_count+ ")";
+                            }
+
                         }
                     }
-                    if (count < 1)
-                    {
-                        return message.CreateReplyMessage($"Nothing found That matches you serach. Here is a list of all Populer Movies that you might want to watch:" + noMoviess);
-                    }
-                    else
-                    {
-                        return message.CreateReplyMessage($"The list of Movies You looking for:" + moviess);
-                    }
-
                 }
+                if (count < 1)
+                {
+                    return message.CreateReplyMessage($"Nothing found That matches you serach. Select one from the following :{Environment.NewLine}{Environment.NewLine}>1) Popular movies{Environment.NewLine}{Environment.NewLine}> 2) Most Played Movies");
+                }
+                else
+                {
+                    return message.CreateReplyMessage($"The list of Movies You looking for:" + moviess);
+                }
+
+            }
             else
             {
-                    return HandleSystemMessage(message);
-                }
+                return HandleSystemMessage(message);
             }
+        }
 
         private Message HandleSystemMessage(Message message)
         {
