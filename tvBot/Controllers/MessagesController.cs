@@ -44,6 +44,12 @@ namespace tvBot
         public long collected_count { get; set; }
         public Movie movie { get; set; }
     }
+    public class Anticipated
+    {
+        public long list_count { get; set; }
+        public Movie movie { get; set; }
+    }
+    
     public class MessagesController : ApiController
     {
         /// <summary>
@@ -60,22 +66,33 @@ namespace tvBot
                 int count = 0;
                 using (var client = new HttpClient { BaseAddress = new Uri("https://api.trakt.tv/") })
                 {
-                    client.DefaultRequestHeaders.Add("trakt.api.key", "468a92c26d3411be7886881b7f40afea47288963a91d9c5a0f43257521ceab74");
-                    using (var response = client.GetAsync("movies/popular").Result)
+                    client.DefaultRequestHeaders.Add("trakt-api-key", "468a92c26d3411be7886881b7f40afea47288963a91d9c5a0f43257521ceab74");
+                    using (var response = await client.GetAsync("movies/popular"))
                     {
-                        var responses = client.GetAsync("movies/played").Result;
 
                         //This one is for the popular movies
-                        var responseString = response.Content.ReadAsStringAsync().Result;
+                        var responseString = await response.Content.ReadAsStringAsync();
+
+                        var responses = await client.GetAsync("movies/played");
+
 
                         //This one is for the Most Played movies
-                        var responseMostPlayedString = responses.Content.ReadAsStringAsync().Result;
+                        var responseMostPlayedString = await responses.Content.ReadAsStringAsync();
+
+
+                        //Anticipated
+                        var responseAnticipated = await client.GetAsync("movies/anticipated");
+
+                        var responseAnticipatedString = await responseAnticipated.Content.ReadAsStringAsync();
 
                         // List<Movie> movies = new List<Movie>();
                         var responseJSON = JsonConvert.DeserializeObject<List<Movie>>(responseString);
                         var responseMostPlayedJSON = JsonConvert.DeserializeObject<List<mostPlayed>>(responseMostPlayedString);
-                        if ((message.Text.ToLower().Contains("popular")|| message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")))
+                        var responseAnticipatedJSON = JsonConvert.DeserializeObject<List<Anticipated>>(responseAnticipatedString);
+
+                        if(message.Text.ToLower().Equals("*"))
                         {
+                            //popular movie
                             for (int i = 0; i < responseJSON.Count; i++)
                             {
                                 if (!responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()))
@@ -100,6 +117,152 @@ namespace tvBot
                                     }
                                     moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
                                 }
+
+                            }
+                            //Anticipated
+                            for (int i = 0; i < responseAnticipatedJSON.Count; i++)
+                            {
+                                if (!responseAnticipatedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Anticipated Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
+                                }
+
+                            }
+                        }
+                        else if ((message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")) && ((message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3"))))
+                        {
+                            //popular movie
+                            for (int i = 0; i < responseJSON.Count; i++)
+                            {
+                                if (!responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Popular Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
+                                }
+                            }
+                            //Most played
+                            for (int i = 0; i < responseMostPlayedJSON.Count; i++)
+                            {
+                                if (!responseMostPlayedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Played Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
+                                }
+
+                            }
+                            //Anticipated
+                            for (int i = 0; i < responseAnticipatedJSON.Count; i++)
+                            {
+                                if (!responseAnticipatedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Anticipated Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
+                                }
+
+                            }
+                        }
+                        else if ((message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")) && ((message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3"))))
+                        {
+                            //popular movie
+                            for (int i = 0; i < responseJSON.Count; i++)
+                            {
+                                if (!responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Popular Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
+                                }
+                            }
+                            //Anticipated
+                            for (int i = 0; i < responseAnticipatedJSON.Count; i++)
+                            {
+                                if (!responseAnticipatedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Anticipated Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
+                                }
+                            }
+                        }
+                        else if ((message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")) && ((message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3"))))
+                        {
+                            //Most played
+                            for (int i = 0; i < responseMostPlayedJSON.Count; i++)
+                            {
+                                if (!responseMostPlayedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Played Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
+                                }
+  
+                            }
+                            //Anticipated
+                            for (int i = 0; i < responseAnticipatedJSON.Count; i++)
+                            {
+                                if (!responseAnticipatedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Anticipated Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
+                                }
+                            }
+                        }
+                        else if ((message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")))
+                        {
+                            for (int i = 0; i < responseJSON.Count; i++)
+                            {
+                                if (!responseJSON[i].title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Popular Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
+                                }
+                            }
+                            //Most played
+                            for (int i = 0; i < responseMostPlayedJSON.Count; i++)
+                            {
+                                if (!responseMostPlayedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (i == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Played Movies-------";
+                                    }
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseMostPlayedJSON[i].movie.title.ToString() + " * Views(" + responseMostPlayedJSON[i].watcher_count + ")";
+                                }
                             }
                         }
                         else if (message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1"))
@@ -115,6 +278,22 @@ namespace tvBot
                                 {
                                     count++;
                                     moviess += $"{Environment.NewLine}{Environment.NewLine} >" + count + ")" + responseJSON[i].title.ToString();
+                                }
+                            }
+                        }
+                        else if (message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3"))
+                        {
+                            for (int i = 0; i < responseJSON.Count; i++)
+                            {
+                                if (responseAnticipatedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()) && (message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3")))
+                                {
+                                    count++;
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
+                                }
+                                else if (message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3"))
+                                {
+                                    count++;
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
                                 }
                             }
                         }
@@ -135,7 +314,7 @@ namespace tvBot
                             }
 
                         }
-                        if (!((message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2"))))
+                        if (!((message.Text.ToLower().Contains("popular") || message.Text.ToLower().Contains("1")) && (message.Text.ToLower().Contains("most played") || message.Text.ToLower().Contains("2")) && ((message.Text.ToLower().Contains("anticipated") || message.Text.ToLower().Contains("3")))))
                         {
                             for (int i = 0; i < responseJSON.Count; i++)
                             {
@@ -161,8 +340,24 @@ namespace tvBot
                                         moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Played Movies-------";
                                     }
                                     countForMostPlayed++;
-                                    moviess += $"{Environment.NewLine}{Environment.NewLine}  " + count + ")>" + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine}  >" + count + ") " + responseMostPlayedJSON[i].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[i].watcher_count + ")";
                                 }
+                            }
+                            //Anticipated
+                            int countAnticipated = 0;
+                            for (int i = 0; i < responseAnticipatedJSON.Count; i++)
+                            {
+                                if (responseAnticipatedJSON[i].movie.title.ToString().ToLower().Contains(message.Text.ToLower()))
+                                {
+                                    count++;
+                                    if (countAnticipated == 0)
+                                    {
+                                        moviess += $"{Environment.NewLine}{Environment.NewLine}------Most Anticipated Movies-------";
+                                    }
+                                    countAnticipated++;
+                                    moviess += $"{Environment.NewLine}{Environment.NewLine} > " + count + ")" + responseAnticipatedJSON[i].movie.title.ToString() + $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} > - Apears on " + responseAnticipatedJSON[i].list_count + " Lists";
+                                }
+
                             }
                         }
                         if (count < 1)
@@ -182,7 +377,7 @@ namespace tvBot
                                 {
                                     noMoviess += $"{Environment.NewLine}{Environment.NewLine} ------Most Played Movie-----";
                                 }
-                                noMoviess += $"{Environment.NewLine}{Environment.NewLine} >" + (j + 1) + ")" + responseMostPlayedJSON[j].movie.title.ToString()+" - Views("+ responseMostPlayedJSON[j].watcher_count+ ")";
+                                noMoviess += $"{Environment.NewLine}{Environment.NewLine} >" + (j + 1) + ")" + responseMostPlayedJSON[j].movie.title.ToString() + " - Views(" + responseMostPlayedJSON[j].watcher_count + ")";
                             }
 
                         }
@@ -190,7 +385,7 @@ namespace tvBot
                 }
                 if (count < 1)
                 {
-                    return message.CreateReplyMessage($"Nothing found That matches you serach. Select one from the following :{Environment.NewLine}{Environment.NewLine}>1) Popular movies{Environment.NewLine}{Environment.NewLine}> 2) Most Played Movies");
+                    return message.CreateReplyMessage($"Hey!, This is what you can do to have fun. Select one from the following categories or send a * to get all the categories:{Environment.NewLine}{Environment.NewLine}>1) Popular movies{Environment.NewLine}{Environment.NewLine}> 2) Most Played Movies{Environment.NewLine}{Environment.NewLine}> 3) Most Anticipated Movies");
                 }
                 else
                 {
